@@ -32,7 +32,10 @@ const produtoSchema = new Schema({
     quantidade: { 
         type: Number, 
         required: true
-    }    
+    },
+    imagem:{
+        type: String
+    }
 });
 
 

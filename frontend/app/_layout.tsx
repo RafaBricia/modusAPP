@@ -4,7 +4,7 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
@@ -12,6 +12,8 @@ import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { CarrinhoProvider } from "@/context/CarrinhoContext"; // Importando o contexto
+import { TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -39,6 +41,18 @@ export default function RootLayout() {
         <Stack.Screen name="welcome" options={{ headerShown: false }}/>
         <Stack.Screen name="login" options={{ headerShown: false }}/>
         <Stack.Screen name="register" options={{ headerShown: false }}/>
+        <Stack.Screen name="chat" options={{title:"Atificial Intelligence Chat",
+          headerTitleAlign:'center',
+          headerLeft: () =>{
+            return <TouchableOpacity onPress={() => router.replace('/changeName')}><Ionicons name='arrow-back' size={24} color="black"></Ionicons></TouchableOpacity>
+          }
+        }}/>
+        <Stack.Screen name="changeName" options={{ 
+          title:"Escreva seu nome",
+          headerLeft: () =>{
+            return <TouchableOpacity onPress={() => router.replace('/(tabs)/home')}><Ionicons name='arrow-back' size={24} color="black"></Ionicons></TouchableOpacity>
+          }
+          }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
         <StatusBar style="auto" />

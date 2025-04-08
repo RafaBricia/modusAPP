@@ -9,6 +9,11 @@ import {
   View,
   Image,
 } from "react-native";
+import httpService from "./services/httpService";
+import  config  from  'react-native-config' ; 
+
+const server = config.SERVER;
+const port = config.PORT;
 
 const Login = () => {
   const router = useRouter();
@@ -44,9 +49,27 @@ const Login = () => {
     }
 
     setErrorMessage("");
-    router.replace("/(tabs)/home");
   };
 
+  const sendForm = async() => {
+    if (!handleErrorForm) return;
+    
+    try{
+      const userData = {
+        email: email.value,
+        senha: password.value
+      }
+
+      const response = await httpService.post(`http://${server}:${port}/api/login`, userData);
+      alert(JSON.stringify(userData, null, 2)); 
+      console.log("Resposta do servidor:", response);
+      router.replace("/(tabs)/home");
+
+    }catch(error){
+      console.error('Erro completo:', error);
+
+    }
+  }
   return (
       <View style={styles.formContainer}>
         <View style={styles.logoContainer}>
@@ -84,7 +107,7 @@ const Login = () => {
             Cadastre-se
           </Text>
         </Text>
-        <TouchableOpacity onPress={handleErrorForm} style={styles.loginButton}>
+        <TouchableOpacity onPress={sendForm} style={styles.loginButton}>
           <Text style={{ color: "#FFF" }}>Entrar</Text>
         </TouchableOpacity>
         <TouchableOpacity

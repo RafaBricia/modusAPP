@@ -1,17 +1,20 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-// Definição da interface do Produto
-interface Produto {
-  quantidade: number;
-  id: string;
-  nome: string;
-  categoria: string;
-  descricao: string;
-  image: any;
-  tamanhos: string;
-  valor: string;
+interface Categoria {
+  _id: string;
+  tipo: string;
 }
 
+interface Produto{
+  _id: string;
+  nome: string;
+  categoria: Categoria;
+  descricao: string;
+  imagem: string;
+  tamanho: string[]; // Garante que é um array de strings
+  valor: number;
+  quantidade: number;
+}
 // Interface do Contexto do Carrinho
 interface CarrinhoContextData {
   carrinho: Produto[];
@@ -31,11 +34,11 @@ export const CarrinhoProvider = ({ children }: { children: ReactNode }) => {
   // Adicionar produto ao carrinho
   const adicionarAoCarrinho = (produto: Produto) => {
     setCarrinho((prevCarrinho) => {
-      const produtoExistente = prevCarrinho.find((item) => item.id === produto.id);
+      const produtoExistente = prevCarrinho.find((item) => item._id === produto._id);
 
       if (produtoExistente) {
         return prevCarrinho.map((item) =>
-          item.id === produto.id ? { ...item, quantidade: item.quantidade + 1 } : item
+          item._id === produto._id ? { ...item, quantidade: item.quantidade + 1 } : item
         );
       } else {
         return [...prevCarrinho, { ...produto, quantidade: 1 }];
@@ -48,7 +51,7 @@ export const CarrinhoProvider = ({ children }: { children: ReactNode }) => {
     setCarrinho((prevCarrinho) => {
       return prevCarrinho
         .map((item) =>
-          item.id === id
+          item._id === id
             ? { ...item, quantidade: item.quantidade - 1 } // Reduz a quantidade
             : item
         )
@@ -58,7 +61,7 @@ export const CarrinhoProvider = ({ children }: { children: ReactNode }) => {
 
   // **Remover completamente o item do carrinho**
   const removerItemDoCarrinho = (id: string) => {
-    setCarrinho((prevCarrinho) => prevCarrinho.filter((item) => item.id !== id));
+    setCarrinho((prevCarrinho) => prevCarrinho.filter((item) => item._id !== id));
   };
 
   return (

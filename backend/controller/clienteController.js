@@ -2,24 +2,16 @@ const Cliente = require("../model/clienteModel");
 
 function verificarCPFValido(cpf) {
     try {
-        if (typeof cpf !== "number") {
+        const cpfString = cpf.toString(); // Converte tanto number quanto string
+        if (cpfString.length !== 11 || !/^\d+$/.test(cpfString)) {
             return false;
         }
-    
-        const cpfString = cpf.toString();
-        if (cpfString.length !== 11) {
-            return false;
-        }
-    
-        if (!/^\d+$/.test(cpfString)) {
-            return false;
-        }
-    
-        return true; 
+        return true;
     } catch (error) {
-        return error; 
+        return false;
     }
 }
+
 function validarEmail(email) {
     try{
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -135,5 +127,7 @@ const putCliente = async (req, res) => {
         res.status(500).json({ message: 'Erro ao atualizar Cliente.' });
     }
 };
+
+
 
 module.exports = { getAllClientes,getCliente, postCliente, putCliente, deleteCliente };

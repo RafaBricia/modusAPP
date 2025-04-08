@@ -10,7 +10,3 @@ router.delete("/cliente/:id", clienteController.deleteCliente);
 router.put("/cliente/:id",  clienteController.putCliente);
 
 module.exports = router;
-
-// router.get("/cliente/:id", withAuth,clienteController.getCliente);
-// router.delete("/cliente/:id",withAuth, clienteController.deleteCliente);
-// router.put("/cliente/:id", withAuth, clienteController.putCliente);

@@ -10,38 +10,11 @@ function verificarTipoValido(tipo) {
 
   }
 }
-
-const postCategoria = async (req, res) => {
-  try {
-    const { tipo } = req.body;
-
-
-    if (!tipo || typeof tipo !== 'string') {
-      return res.status(400).json({ message: 'O campo "tipo" é obrigatório e deve ser uma string.' });
-    }
-
-    const valoresPermitidos = Categoria.schema.path('tipo').enumValues;
-
-    if (!valoresPermitidos.includes(tipo)) {
-      valoresPermitidos.push(tipo);
-
-      Categoria.schema.path('tipo').enum(...valoresPermitidos);
-    }
-
-    const newCategoria = new Categoria({ tipo });
-    await newCategoria.save();
-
-    res.status(201).json({ message: "Nova categoria criada com sucesso!", categoria: newCategoria });
-  } catch (error) {
-    console.error("Erro ao criar categoria:", error); 
-    res.status(500).json({ message: 'Erro ao criar categoria.', error: error.message });
-  }
-};
-
+;
 
 const categoriaAllget = async (req, res) => {
   try {
-    const categorias = await Categoria.find();
+    const categorias = (await Categoria.find());
     res.json(categorias);
   } catch (error) {
     res.status(500).json({
@@ -112,6 +85,5 @@ const putCategoria = async (req, res) => {
 } catch (error) {
     res.status(500).json({ message: 'Categoria não foi criada.', error: error.message });
 }
-};
-
-module.exports = {categoriaAllget, getCategoria, postCategoria, putCategoria, deleteCategoria};
+}
+module.exports = {categoriaAllget, getCategoria};

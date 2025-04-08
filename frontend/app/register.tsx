@@ -1,5 +1,4 @@
 "@expo/vector-icons";
-// import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -10,9 +9,18 @@ import {
   View,
   Image,
 } from "react-native";
+import httpService from "./services/httpService";
+import axios from "axios";
+import  config  from  'react-native-config' ;
+
+const server = config.SERVER;
+const port = config.PORT;
+
+const SERVER = `http://${server}:${port}`;
 
 const register = () => {
   const router = useRouter();
+
 
   const [email, setEmail] = useState({ value: "", dirty: false });
   const [fullName, setFullName] = useState({ value: "", dirty: false });
@@ -22,6 +30,8 @@ const register = () => {
     value: "",
     dirty: false,
   });
+  const [isLoading, setIsLoading] = useState(false);
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const cpfRegex = /^\d{11}$/;
 
@@ -77,113 +87,148 @@ const register = () => {
     return <Text style={styles.error}></Text>;
   };
 
-  const handleErrorForm = () => {
+  const validateForm = () => {
     setEmail({ ...email, dirty: true });
     setFullName({ ...fullName, dirty: true });
     setCpf({ ...cpf, dirty: true });
     setPassword({ ...password, dirty: true });
     setConfirmPassword({ ...confirmPassword, dirty: true });
 
-    let hasError = false;
-
-    if (!email.value || !emailRegex.test(email.value)) {
-      hasError = true;
-    }
-    if (!fullName.value || fullName.value.length < 2) {
-      hasError = true;
-    }
-    if (!cpf.value || !cpfRegex.test(cpf.value)) {
-      hasError = true;
-    }
-    if (!password.value) {
-      hasError = true;
-    }
-    if (!confirmPassword.value || password.value !== confirmPassword.value) {
-      hasError = true;
-    }
-
-    if (!hasError) {
-      router.replace("/(tabs)/home");
-    }
+    return (
+      email.value &&
+      emailRegex.test(email.value) &&
+      fullName.value &&
+      fullName.value.length >= 2 &&
+      cpf.value &&
+      cpfRegex.test(cpf.value) &&
+      password.value &&
+      confirmPassword.value &&
+      password.value === confirmPassword.value
+    );
   };
 
-  return (
-      <View style={styles.formContainer}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("../assets/images/logo.png")}
-            style={styles.logo}
-          />
-        </View>
-        <Text style={styles.label}>Email:</Text>
-        <TextInput
-          style={styles.input}
-          placeholderTextColor="#999"
-          value={email.value}
-          onChangeText={(text) => setEmail({ value: text, dirty: true })}
-        />
-        {handleErrorEmail()}
-        <Text style={styles.label}>Nome Completo:</Text>
-        <TextInput
-          style={styles.input}
-          placeholderTextColor="#999"
-          value={fullName.value}
-          onChangeText={(text) => setFullName({ value: text, dirty: true })}
-        />
-        {handleErrorFullName()}
-        <Text style={styles.label}>CPF:</Text>
-        <TextInput
-          style={styles.input}
-          placeholderTextColor="#999"
-          value={cpf.value}
-          keyboardType="numeric"
-          maxLength={11}
-          onChangeText={(text) => {
-            const numericText = text.replace(/\D/g, "");
-            setCpf({ value: numericText, dirty: true });
-          }}
-        />
-        {handleErrorCpf()}
-        <Text style={styles.label}>Senha</Text>
-        <TextInput
-          style={styles.input}
-          placeholderTextColor="#999"
-          secureTextEntry
-          value={password.value}
-          onChangeText={(text) => setPassword({ value: text, dirty: true })}
-        />
-        {handleErrorPassword()}
-        <Text style={styles.label}>Repetir Senha:</Text>
-        <TextInput
-          style={styles.input}
-          secureTextEntry
-          placeholderTextColor="#999"
-          value={confirmPassword.value}
-          onChangeText={(text) =>
-            setConfirmPassword({ value: text, dirty: true })
-          }
-        />
-        {handleErrorConfirmPassword()}
+  const sendForm = async () => {
+    if (!validateForm()) return;
 
-        <Text style={styles.loginLink}>
-          Já possui cadastro?{" "}
-          <Text
-            style={styles.loginLinkBold}
-            onPress={() => router.replace("/welcome")}
-          >
-            Faça login
-          </Text>
-        </Text>
-        <TouchableOpacity onPress={handleErrorForm} style={styles.loginButton}>
-          <Text style={{ color: "#FFF" }}>Cadastrar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => router.replace("/welcome")}
-          style={styles.backButton}
-        >
-          <Text style={{ color: "#FFF" }}>Voltar</Text>
-        </TouchableOpacity>
+    setIsLoading(true);
+
+    try {
+        const userData = {
+            email: email.value,
+            nome: fullName.value,  
+            cpf: cpf.value,
+            senha: password.value  
+        };
+
+        console.log('Dados sendo enviados:', userData);
+
+        const response = await httpService.post(
+            `${SERVER}/api/cliente`,
+            userData
+        );
+
+        console.log('Resposta:', response);
+        router.replace('/(tabs)/home');
+    } catch (error) {
+        console.error('Erro completo:', error);
+        router.replace('/login');
+
+        
+    } finally {
+        setIsLoading(false);
+    }
+};
+
+  return (
+    <View style={styles.formContainer}>
+      <View style={styles.logoContainer}>
+        <Image
+          source={require("../assets/images/logo.png")}
+          style={styles.logo}
+        />
       </View>
+      
+      <Text style={styles.label}>Email:</Text>
+      <TextInput
+        style={styles.input}
+        placeholderTextColor="#999"
+        value={email.value}
+        onChangeText={(text) => setEmail({ value: text, dirty: true })}
+      />
+      {handleErrorEmail()}
+
+      <Text style={styles.label}>Nome Completo:</Text>
+      <TextInput
+        style={styles.input}
+        placeholderTextColor="#999"
+        value={fullName.value}
+        onChangeText={(text) => setFullName({ value: text, dirty: true })}
+      />
+      {handleErrorFullName()}
+
+      <Text style={styles.label}>CPF:</Text>
+      <TextInput
+        style={styles.input}
+        placeholderTextColor="#999"
+        value={cpf.value}
+        keyboardType="numeric"
+        maxLength={11}
+        onChangeText={(text) => {
+          const numericText = text.replace(/\D/g, "");
+          setCpf({ value: numericText, dirty: true });
+        }}
+      />
+      {handleErrorCpf()}
+
+      <Text style={styles.label}>Senha</Text>
+      <TextInput
+        style={styles.input}
+        placeholderTextColor="#999"
+        secureTextEntry
+        value={password.value}
+        onChangeText={(text) => setPassword({ value: text, dirty: true })}
+      />
+      {handleErrorPassword()}
+
+      <Text style={styles.label}>Repetir Senha:</Text>
+      <TextInput
+        style={styles.input}
+        secureTextEntry
+        placeholderTextColor="#999"
+        value={confirmPassword.value}
+        onChangeText={(text) =>
+          setConfirmPassword({ value: text, dirty: true })
+        }
+      />
+      {handleErrorConfirmPassword()}
+
+      <Text style={styles.loginLink}>
+        Já possui cadastro?{" "}
+        <Text
+          style={styles.loginLinkBold}
+          onPress={() => router.replace("/welcome")}
+        >
+          Faça login
+        </Text>
+      </Text>
+
+      <TouchableOpacity 
+        onPress={sendForm} 
+        style={styles.loginButton}
+        disabled={isLoading}
+      >
+        <Text style={{ color: "#FFF" }}>
+          {isLoading ? 'Cadastrando...' : 'Cadastrar'}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => router.replace("/welcome")}
+        style={styles.backButton}
+      >
+        <Text style={{ color: "#FFF" }}>Voltar</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
