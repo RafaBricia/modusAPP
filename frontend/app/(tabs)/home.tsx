@@ -11,12 +11,10 @@ import {
 } from "react-native";
 import Card from "../../components/card/card";
 import Navbar from "../../components/navbar/navbar";
-import config from 'react-native-config'; 
 
-const server = config.SERVER;
-const port = config.PORT;
+import config from '../../config';  
 
-const SERVER = `http://${server}:${port}`;
+const SERVER = `http://${config.SERVER}:${config.PORT}/api`;
 
 interface Product {
   _id: string;

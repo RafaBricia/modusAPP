@@ -10,10 +10,10 @@ import {
   Image,
 } from "react-native";
 import httpService from "./services/httpService";
-import  config  from  'react-native-config' ; 
+import config from '../config';  
 
-const server = config.SERVER;
-const port = config.PORT;
+const server = `${config.SERVER}`;
+const port = `${config.PORT}`;
 
 const Login = () => {
   const router = useRouter();

@@ -3,12 +3,13 @@ import { SafeAreaView, Text, View, StyleSheet, TextInput, TouchableOpacity, Keyb
 import { Ionicons } from "@expo/vector-icons";
 import { FlatList } from "react-native-gesture-handler";
 import { useLocalSearchParams } from "expo-router";
-import  config  from  'react-native-config' ; 
 import Animated from "react-native-reanimated";
 
+import config from '../config';  
 
-const server = config.SERVER;
-const port = config.PORT;
+const server = `${config.SERVER}`;
+const port = `${config.PORT}`
+
 let ws: WebSocket
 
 const Chat = () => {

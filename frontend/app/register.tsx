@@ -8,15 +8,12 @@ import {
   TouchableOpacity,
   View,
   Image,
+  Alert,
 } from "react-native";
 import httpService from "./services/httpService";
-import axios from "axios";
-import  config  from  'react-native-config' ;
+import config from '../config';  // Mudei para import direto
 
-const server = config.SERVER;
-const port = config.PORT;
-
-const SERVER = `http://${server}:${port}`;
+const url = `http://${config.SERVER}:${config.PORT}/api`;
 
 const register = () => {
   const router = useRouter();
@@ -121,11 +118,12 @@ const register = () => {
         };
 
         console.log('Dados sendo enviados:', userData);
-
-        const response = await httpService.post(
-            `${SERVER}/api/cliente`,
-            userData
+        Alert.alert(
+          'Configuração',
+          `Servidor: ${config.SERVER}\nPorta: ${config.PORT}\nURL: ${url}`
         );
+
+        const response = await httpService.post(`${url}/cliente`, userData);
 
         console.log('Resposta:', response);
         router.replace('/(tabs)/home');
@@ -138,6 +136,45 @@ const register = () => {
         setIsLoading(false);
     }
 };
+
+//   const sendForm = async () => {
+//     if (!validateForm()) return;
+
+//     setIsLoading(true);
+
+//     try {
+//         const userData = {
+//             email: email.value,
+//             nome: fullName.value,  
+//             cpf: cpf.value,
+//             senha: password.value  
+//         };
+
+//         console.log('Dados sendo enviados:', userData);
+//         Alert.alert(
+//           'Configuração do Servidor',
+//           `Server: ${config.SERVER}\nPort: ${config.PORT}\nURL Final: http://${config.SERVER}:${config.PORT}`
+//         );
+//                 console.log('Server:', config.SERVER);
+//         console.log('Port:', config.PORT);
+//         console.log('URL Final:', `http://${config.server}:${config.port}`);
+
+//         const response = await httpService.post(
+//             `${url}/api/cliente`,
+//             userData
+//         );
+
+//         console.log('Resposta:', response);
+//         router.replace('/(tabs)/home');
+//     } catch (error) {
+//         console.error('Erro completo:', error);
+//         router.replace('/login');
+
+        
+//     } finally {
+//         setIsLoading(false);
+//     }
+// };
 
   return (
     <View style={styles.formContainer}>
