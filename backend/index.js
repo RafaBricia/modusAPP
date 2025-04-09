@@ -9,6 +9,8 @@ const ws = new WebSocketServer({ server });
 const cors = require('cors');
 const bodyParser = require("body-parser");
 const db = require("./db/database.js");
+const Carrinho = require('./model/carrinhoModel.js')
+
 
 // Importação de rotas
 const clienteRoute = require("./route/clienteRoute.js");
@@ -43,7 +45,26 @@ ws.on('connection', (client) => {
     
     client.on("message", async (message) => {
         const msg = JSON.parse(message.toString());
-        const context = './src/context/CV_English.pdf';
+        
+        const carrinhos = await Carrinho.find()
+            .populate('cliente')
+            .populate('produto');
+        
+        let historicoString = "Histórico de Compras:\n\n";
+        
+        carrinhos.forEach((carrinho, index) => {
+            historicoString += 
+                `Compra ${index + 1}:\n` +
+                `- Cliente: ${carrinho.cliente.nome}\n` +
+                `- Produto: ${carrinho.produto.nome}\n` +
+                `- Quantidade: ${carrinho.quantidade}\n` +
+                `- Valor Unitário: R$ ${carrinho.valor.toFixed(2)}\n` +
+                `- Data: ${carrinho.data.toLocaleDateString('pt-BR')}\n` +
+                `- Descrição: "${carrinho.frase}"\n\n`;
+        });
+        
+        const context = historicoCompras;
+        
         const result = await aiService.longContext(msg.text, context);
         const resultJson = { text: result.text(), sentBy: 'Gemini' };
         const msgString = JSON.stringify(resultJson);

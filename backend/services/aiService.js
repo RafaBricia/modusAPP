@@ -1,6 +1,6 @@
-import dotenv from 'dotenv';
-import fs from 'fs';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+const dotenv = require('dotenv');
+const fs = require('fs');
+const { GoogleGenerativeAI }  = require('@google/generative-ai');
 
 dotenv.config();
 
@@ -25,7 +25,7 @@ const gemini = {
         return result.response
     },
 
-    longContext: async (prompt, pdfPath1, pdfPath2) => {
+    longContext: async (prompt, context) => {
         const instrucoes = `
         Você é um pesquisador de elite e especialista no assunto, com habilidades analíticas avançadas.
         Sua especialidade está na análise detalhada de documentos extensos e na síntese de respostas baseadas em evidências claras.
@@ -54,20 +54,17 @@ const gemini = {
         Forneça o título do documento e uma resposta final baseada exclusivamente no conteúdo do documento, atendendo a todos os requisitos da descrição da tarefa.
         `;
 
-        // Lendo os arquivos PDF e convertendo para Base64
-        const pdfBuffer1 = fs.readFileSync(pdfPath1);
-        const pdfBase64_1 = pdfBuffer1.toString('base64');
+        // // Lendo os arquivos PDF e convert'./src/context/dadosAnaliticos.pdf'endo para Base64
+        // const pdfBuffer1 = fs.readFileSync(context);
+        // const pdfBase64_1 = pdfBuffer1.toString('base64');
 
-        const pdfBuffer2 = fs.readFileSync(pdfPath2);
-        const pdfBase64_2 = pdfBuffer2.toString('base64');
 
         // Construindo a requisição para a API Gemini
         const p = {
             "contents": [{
                 "parts": [
                     { "text": instrucoes },
-                    { "inline_data": { "mime_type": "application/pdf", "data": pdfBase64_1 } },
-                    { "inline_data": { "mime_type": "application/pdf", "data": pdfBase64_2 } }
+                    { "inline_data": { "data": context } }
                 ]
             }]
         };
@@ -77,4 +74,4 @@ const gemini = {
     }
 };
 
-export default gemini;
+module.exports = gemini;

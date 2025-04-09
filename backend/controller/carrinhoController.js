@@ -1,5 +1,7 @@
 const Carrinho = require("../model/carrinhoModel.js");
 const Produto = require("../model/produtoModel.js");
+const Cliente = require('../model/clienteModel.js')
+
 
 function verificarQuantidadValida(qnt) {
 
@@ -23,6 +25,15 @@ async function produtoExistente(produto) {
     }
 }
 
+async function clienteExistente(cliente) {
+    try{
+        const cliente = await cliente.findById(cliente.id);
+        return !!cliente;
+
+    } catch(error){
+        return error 
+    }
+}
 
 function valorValido(valor) {
 
@@ -38,9 +49,9 @@ function valorValido(valor) {
 
 const postCarrinho = async (req, res) => {
     try {
-        const { quantidade, valor, produto } = req.body;
+        const { quantidade, valor, produto, cliente } = req.body;
 
-        if (!quantidade || !valor || !produto) {
+        if (!quantidade || !valor || !produto || !cliente) {
             return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
         }
 
@@ -52,11 +63,16 @@ const postCarrinho = async (req, res) => {
             return res.status(400).json({ message: 'Valor precisa ser válido' });
         }
 
+        if (!(await clienteExistente(cliente))) {
+            return res.status(400).json({ message: 'Cliente precisa existir.' });
+        }
+
         if (!(await produtoExistente(produto))) {
             return res.status(400).json({ message: 'Produto precisa existir.' });
         }
 
-        const newCarrinho = new Carrinho({ quantidade, valor, produto});
+        const frase = `${cliente.nome} no dia ${date} comprou um ${produto.nome} no valor de ${produto.valor}, e o total  do carrinhofoi de ${valor}`
+        const newCarrinho = new Carrinho({ quantidade, valor, produto, cliente, frase});
         await newCarrinho.save();
 
         res.json({ message: "Novo Carrinho foi criado!", Carrinho: newCarrinho });
@@ -68,7 +84,7 @@ const postCarrinho = async (req, res) => {
 
 const getAllCarrinhos = async (req, res) => {
     try {
-        const carrinhos = await Carrinho.find();
+        const carrinhos = await Carrinho.find().populate('cliente');
         res.json(carrinhos);
     } catch (error) {
         res.status(500).json({ message: 'Não é possível listar os Carrinhos.' });

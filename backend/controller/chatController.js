@@ -12,9 +12,8 @@ const chatController = {
     
     longContext: async (req, res) => {
         try {
-            const pdfPath1 = './src/context/dadosAnaliticos_MODA.pdf';
-            const pdfPath2 = './src/context/tendencias2025.pdf';
-            const result = await aiService.longContext(req.body.prompt, pdfPath1, pdfPath2);
+            const context = m
+            const result = await aiService.longContext(req.body.prompt,context);
             res.status(200).json(result.text());
         } catch (error) {
             res.status(500).json({ error: error.message });
