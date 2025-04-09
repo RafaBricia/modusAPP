@@ -1,3 +1,4 @@
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   DarkTheme,
   DefaultTheme,
@@ -11,11 +12,10 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { CarrinhoProvider } from "@/context/CarrinhoContext"; // Importando o contexto
+import { CarrinhoProvider } from "@/context/CarrinhoContext"; 
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -34,7 +34,8 @@ export default function RootLayout() {
     return null;
   }
     
-    return (
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <CarrinhoProvider>
         <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
           <Stack>
@@ -44,7 +45,7 @@ export default function RootLayout() {
             <Stack.Screen 
               name="chat" 
               options={{
-                title: "Atificial Intelligence Chat",
+                title: "Artificial Intelligence Chat",
                 headerTitleAlign: 'center',
                 headerLeft: () => (
                   <TouchableOpacity onPress={() => router.back()}>
@@ -69,5 +70,6 @@ export default function RootLayout() {
           <StatusBar style="auto" />
         </ThemeProvider>
       </CarrinhoProvider>
-    );
-  }
+    </GestureHandlerRootView>
+  );
+}

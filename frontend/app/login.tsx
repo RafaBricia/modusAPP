@@ -1,16 +1,17 @@
-// import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+import { 
+  StyleSheet, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  View, 
   Image,
+  Alert 
 } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import httpService from "./services/httpService";
-import config from '../config';  
+import config from '../config';
 
 const server = `${config.SERVER}`;
 const port = `${config.PORT}`;
@@ -21,7 +22,9 @@ const Login = () => {
   const [email, setEmail] = useState({ value: "", dirty: false });
   const [password, setPassword] = useState({ value: "", dirty: false });
   const [errorMessage, setErrorMessage] = useState("");
+  const [name, setname] = useState('')
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 
   const handleErrorEmail = () => {
     if (!email.value && email.dirty) {
@@ -62,6 +65,14 @@ const Login = () => {
 
       const response = await httpService.post(`http://${server}:${port}/api/login`, userData);
       alert(JSON.stringify(userData, null, 2)); 
+      console.log("RAFAEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEELA", JSON.stringify(response))
+      const loginName = response.cliente.nome
+
+      AsyncStorage.setItem(
+        'userName',
+        `${loginName}`
+      );
+
       console.log("Resposta do servidor:", response);
       router.replace("/(tabs)/home");
 
@@ -70,6 +81,8 @@ const Login = () => {
 
     }
   }
+
+  
   return (
       <View style={styles.formContainer}>
         <View style={styles.logoContainer}>

@@ -1,5 +1,5 @@
 // config.js
 export default {
-  SERVER: '192.168.1.180',
+  SERVER: '10.5.5.185',
   PORT: '3000'
 };

@@ -1,11 +1,12 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { SafeAreaView, Text, View, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from "@expo/vector-icons";
 import { FlatList } from "react-native-gesture-handler";
 import { useLocalSearchParams } from "expo-router";
 import Animated from "react-native-reanimated";
 
-import config from '../config';  
+import config from '../../config';  
 
 const server = `${config.SERVER}`;
 const port = `${config.PORT}`
@@ -20,6 +21,24 @@ const Chat = () => {
     const [userLogged, setUserLogged] = useState(router.name);
     const [chat, setChat] = useState<{ messages: any[] }>({ messages: [] });
     const [text, setText] = useState("");
+    const [name, setName] = useState('');
+
+// o asycnStorage retorna uma Promise, então precisa usar um useEffect com await ou .then().
+   useEffect(() => {
+    const fetchUserName = async () => {
+        try {
+            const storedName = await AsyncStorage.getItem('userName');
+            if (storedName) {
+                setName(storedName);
+            }
+        } catch (error) {
+            console.error('Erro ao recuperar nome do usuário:', error);
+        }
+    };
+
+    fetchUserName();
+}, []);
+
     
     useEffect(() => {
         ws = new WebSocket(`ws://${server}:${port}`);
@@ -53,7 +72,7 @@ const Chat = () => {
                 ref={scrollRef}
                 style={styles.scrollViewContainer}
                 data={chat.messages}
-                renderItem={({ item }) => <Balloon message={item} userLogged={userLogged} />}
+                renderItem={({ item }) => <Balloon message={item} userLogged={name} />}
                 ListEmptyComponent={() => <Text style={styles.emptyMessage}>Nenhuma mensagem</Text>}
             />
 

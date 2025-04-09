@@ -5,7 +5,7 @@ import { Text, TouchableOpacity, View, TextInput, StyleSheet } from "react-nativ
 const ChangeName = () => {
     const [name, setName] = useState("");
     const router = useRouter();
-
+// usar o AsyncStorage pra salvar quem esta logado
     return (
         <View style={styles.container}>
             <Text style={styles.label}>Digite seu nome:</Text>
@@ -18,7 +18,7 @@ const ChangeName = () => {
             <TouchableOpacity 
                 disabled={(name.trim()==='')}
                 style={styles.button} 
-                onPress={() => router.replace({pathname:'/chat', params: {name}})}
+                onPress={() => router.replace({pathname:'/(tabs)/chat', params: {name}})}
             >
                 <Text style={styles.buttonText}>Enviar</Text>
             </TouchableOpacity>
