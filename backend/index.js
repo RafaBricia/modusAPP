@@ -27,17 +27,6 @@ const aiService = require('./services/aiService.js'); // Adicione esta linha
 app.use(bodyParser.json());
 app.use(cors());
 
-// Rotas
-app.use("/api", produtoRoute);
-app.use("/api", PagamentoRoute);
-app.use("/api", clienteRoute);
-app.use("/api", carrinhoRoute);
-app.use("/api", loginRoute);
-app.use("/api", categoriaRoute);
-app.use("/api", pedidosRoute);
-app.use("/api", ChatRoute);
-
-// WebSocket
 const clients = new Set();
 
 ws.on('connection', (client) => {
@@ -50,17 +39,10 @@ ws.on('connection', (client) => {
             .populate('cliente')
             .populate('produto');
         
-        let historicoString = "Histórico de Compras:\n\n";
+        let historicoString = '';
         
-        carrinhos.forEach((carrinho, index) => {
-            historicoString += 
-                `Compra ${index + 1}:\n` +
-                `- Cliente: ${carrinho.cliente.nome}\n` +
-                `- Produto: ${carrinho.produto.nome}\n` +
-                `- Quantidade: ${carrinho.quantidade}\n` +
-                `- Valor Unitário: R$ ${carrinho.valor.toFixed(2)}\n` +
-                `- Data: ${carrinho.data.toLocaleDateString('pt-BR')}\n` +
-                `- Descrição: "${carrinho.frase}"\n\n`;
+        carrinhos.forEach((carrinho) => {
+            historicoString = carrinho.frase
         });
         
         const context = historicoCompras;
@@ -75,8 +57,17 @@ ws.on('connection', (client) => {
     });
 });
 
-// Inicia o servidor
 const port = 3000;
 server.listen(port, () => {
     console.log(`Aplicação rodando na porta ${port}`);
 });
+
+
+app.use("/api", produtoRoute);
+app.use("/api", PagamentoRoute);
+app.use("/api", clienteRoute);
+app.use("/api", carrinhoRoute);
+app.use("/api", loginRoute);
+app.use("/api", categoriaRoute);
+app.use("/api", pedidosRoute);
+app.use("/api", ChatRoute);

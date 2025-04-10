@@ -3,15 +3,19 @@ const { Schema } = mongoose;
 
 const pedidoSchema = new Schema({
 
-  quantidade: { 
-    type: Number, 
-    required: true
-   },
-
   cliente: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref:"cliente", 
     required: true 
+  },
+  carrinho :{
+    type: mongoose.Schema.Types.ObjectId, 
+    ref:"carrinho", 
+    required: true 
+  },
+  frase:{
+    type: String, 
+    required: true
   }
 
 });

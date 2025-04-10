@@ -25,16 +25,6 @@ async function produtoExistente(produto) {
     }
 }
 
-async function clienteExistente(cliente) {
-    try{
-        const cliente = await cliente.findById(cliente.id);
-        return !!cliente;
-
-    } catch(error){
-        return error 
-    }
-}
-
 function valorValido(valor) {
 
     try{
@@ -48,10 +38,11 @@ function valorValido(valor) {
 
 
 const postCarrinho = async (req, res) => {
+    
     try {
-        const { quantidade, valor, produto, cliente } = req.body;
+        const { quantidade, produto, valor } = req.body;
 
-        if (!quantidade || !valor || !produto || !cliente) {
+        if (!quantidade || !produto || !valor) {
             return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
         }
 
@@ -59,28 +50,38 @@ const postCarrinho = async (req, res) => {
             return res.status(400).json({ message: 'Quantidade deve ser um valor positivo' });
         }
 
-        if (!valorValido(valor)) {
-            return res.status(400).json({ message: 'Valor precisa ser válido' });
-        }
+        if(!valorValido(valor)){
+            return res.status(400).json({ message: 'Valor deve ser um valor positivo' });
 
-        if (!(await clienteExistente(cliente))) {
-            return res.status(400).json({ message: 'Cliente precisa existir.' });
         }
 
         if (!(await produtoExistente(produto))) {
             return res.status(400).json({ message: 'Produto precisa existir.' });
         }
 
-        const frase = `${cliente.nome} no dia ${date} comprou um ${produto.nome} no valor de ${produto.valor}, e o total  do carrinhofoi de ${valor}`
-        const newCarrinho = new Carrinho({ quantidade, valor, produto, cliente, frase});
+        const produtoEncontrado = await Produto.findById(produto);
+        if (!produtoEncontrado) {
+            return res.status(400).json({ message: 'Produto não encontrado.' });
+        }
+
+        const newCarrinho = new Carrinho({
+            quantidade,
+            valor,
+            produto
+        });
+
         await newCarrinho.save();
 
-        res.json({ message: "Novo Carrinho foi criado!", Carrinho: newCarrinho });
+        res.json({ 
+            message: "Produto adicionado ao carrinho!", 
+            carrinho: newCarrinho 
+        });
 
     } catch (error) {
-        res.status(500).json({ message: 'Carrinho não foi criado.', error: error.message });
+        res.status(500).json({ message: 'Erro ao adicionar ao carrinho.', error: error.message });
     }
 };
+
 
 const getAllCarrinhos = async (req, res) => {
     try {

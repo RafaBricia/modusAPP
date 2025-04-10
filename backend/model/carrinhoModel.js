@@ -10,20 +10,12 @@ const carrinhoSchema = new Schema({
     type: Number, 
     required: true
   },
-  produto: { 
+
+  produto: [{ 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "produto", 
     required: true
-  },
-  cliente: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "cliente",
-    required: true
-  },
-  frase: {
-    type: String,
-    required: false
-  },
+  }],
   data: {
     type: Date,
     default: Date.now, 

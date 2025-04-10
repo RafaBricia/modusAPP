@@ -1,17 +1,22 @@
 const Pedido = require("../model/pedidosModel.js");
-const Cliente = require('../model/clienteModel.js')
+const Cliente = require('../model/clienteModel.js');
+const Carrinho = require('../model/carrinhoModel.js')
 
 
-function verificarQuantidadValida(qnt) {
-    return Number.isInteger(qnt) && qnt > 0;
-}
-
-async function ClienteExistente(client) {
+async function CarrinhoExistente(client) {
     try {
-        const cliente = await Cliente.findById(client); // Correção aqui
+        const cliente = await Cliente.findById(client); 
         return !!cliente;
     } catch (error) {
-        return false; // Correção para evitar erro como retorno
+        return false; 
+    }
+}
+async function ClienteExistente(carrinho) {
+    try {
+        const carrinho = await Carrinho.findById(carrinho).populate('produto'); 
+        return !!carrinho;
+    } catch (error) {
+        return false; 
     }
 }
 
@@ -20,21 +25,27 @@ async function ClienteExistente(client) {
 const postPedido = async (req, res) => {
     try {
 
-        const { quantidade, cliente } = req.body;
+        const { cliente, carrinho } = req.body;
 
-        if (!quantidade || !cliente) {
+        if ( !cliente || !carrinho) {
             return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
         }
 
-        if (!verificarQuantidadValida(quantidade)) { 
-            return res.status(400).json({ message: 'Quantidade deve ser um número positivo.' });
+        if (!(await CarrinhoExistente(carrinho))) {
+            return res.status(400).json({ message: 'Carrinho não encontrado.' });
         }
 
         if (!(await ClienteExistente(cliente))) {
             return res.status(400).json({ message: 'Cliente não encontrado.' });
         }
 
-        const newPedido = new Pedido({ quantidade, cliente });
+        const newPedido = new Pedido({ 
+            cliente, 
+            carrinho,
+            frase: `${cliente.nome} comprou ${carrinho.quantidade}x ${carrinho.produto.nome} por R$ ${carrinho.produto.valor} cada. Total: R$ ${carrinho.valorTotal}`
+ 
+        });
+
         await newPedido.save();
 
         res.json({ message: "Novo Pedido foi criado!", Pedido: newPedido });
