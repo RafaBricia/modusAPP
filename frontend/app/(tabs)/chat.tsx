@@ -18,10 +18,10 @@ const Chat = () => {
     const router = useLocalSearchParams();
     const scrollRef = useRef<FlatList>(null)
     
-    const [userLogged, setUserLogged] = useState(router.name);
+    const [userLogged, setUserLogged] = useState('');
     const [chat, setChat] = useState<{ messages: any[] }>({ messages: [] });
     const [text, setText] = useState("");
-    const [name, setName] = useState('');
+    // const [name, setName] = useState('');
 
 // o asycnStorage retorna uma Promise, então precisa usar um useEffect com await ou .then().
    useEffect(() => {
@@ -29,7 +29,7 @@ const Chat = () => {
         try {
             const storedName = await AsyncStorage.getItem('userName');
             if (storedName) {
-                setName(storedName);
+                setUserLogged(storedName);
             }
         } catch (error) {
             console.error('Erro ao recuperar nome do usuário:', error);
@@ -47,7 +47,6 @@ const Chat = () => {
         }
         ws.onmessage = (event) => {
             const msg = JSON.parse(event.data);
-            chat.messages.push(msg)
             setChat((prevChat) => ({ messages: [...prevChat.messages, msg] }));
             if(msg.sendBy === userLogged){
                 setText("");
@@ -72,7 +71,7 @@ const Chat = () => {
                 ref={scrollRef}
                 style={styles.scrollViewContainer}
                 data={chat.messages}
-                renderItem={({ item }) => <Balloon message={item} userLogged={name} />}
+                renderItem={({ item }) => <Balloon message={item} userLogged={userLogged} />}
                 ListEmptyComponent={() => <Text style={styles.emptyMessage}>Nenhuma mensagem</Text>}
             />
 

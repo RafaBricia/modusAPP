@@ -1,6 +1,16 @@
-import React from "react";
-import { Modal, TouchableOpacity, StyleSheet, View, Image, Text, Alert } from "react-native";
+import React, { useState } from "react";
+import { 
+  Modal, 
+  TouchableOpacity, 
+  StyleSheet, 
+  View, 
+  Image, 
+  Text, 
+  Alert 
+} from "react-native";
 import { useCarrinho } from "@/context/CarrinhoContext";
+import httpService from "@/app/services/httpService";
+import config from '../../config';
 
 interface Categoria {
   _id: string;
@@ -8,16 +18,15 @@ interface Categoria {
 }
 
 interface Product {
-    _id: string;
-    nome: string;
-    categoria: Categoria;
-    descricao: string;
-    imagem: string;
-    tamanho: string[];  // Alterado para array de strings
-    valor: number;
-    quantidade: number;
-  }
-  
+  _id: string;
+  nome: string;
+  categoria: Categoria;
+  descricao: string;
+  imagem: string;
+  tamanho: string[];
+  valor: number;
+  quantidade: number;
+}
 
 interface ProductModalProps {
   visible: boolean;
@@ -25,26 +34,34 @@ interface ProductModalProps {
   onClose: () => void;
 }
 
-const ProductModal = ({ visible, product, onClose }: ProductModalProps) => {
-  const { adicionarAoCarrinho } = useCarrinho();
+const server = `${config.SERVER}`;
+const port = `${config.PORT}`;
+const url = `http://${server}:${port}/api`;
 
-  const handleComprar = (produto: Product) => {
-    const produtoParaCarrinho = {
-      _id: produto._id,
-      nome: produto.nome,
-      categoria: produto.categoria,
-      descricao: produto.descricao,
-      imagem: produto.imagem,
-      tamanho: produto.tamanho,
-      valor: produto.valor,
-      quantidade: produto.quantidade
-    };
-  
-    adicionarAoCarrinho(produtoParaCarrinho);
-    Alert.alert("Sucesso!", "Item adicionado ao carrinho.");
-    onClose();
+const ProductModal = ({ visible, product, onClose }: ProductModalProps) => {
+  // const { adicionarAoCarrinho } = useCarrinho();
+
+  const handleComprar = async (produto: Product) => {
+    if (!produto) return;
+
+    try {
+      const produtoParaCarrinho = {
+        _id: produto._id,
+        quantidade: produto.quantidade || 1, // Definir um valor padrão caso esteja indefinido
+      };
+
+      const response = await httpService.post(`${url}/carrinho`, produtoParaCarrinho);
+
+      // Se a requisição foi bem-sucedida, adiciona ao carrinho local
+      // adicionarAoCarrinho(produtoParaCarrinho);
+      Alert.alert("Sucesso!", `Item adicionado ao carrinho.\n${JSON.stringify(response)}`);
+
+      onClose();
+    } catch (error) {
+      console.error("Erro ao adicionar ao carrinho:", error);
+      Alert.alert("Erro", "Não foi possível adicionar o item ao carrinho.");
+    }
   };
-  
 
   return (
     <Modal
@@ -63,17 +80,19 @@ const ProductModal = ({ visible, product, onClose }: ProductModalProps) => {
             <Text style={styles.atributosCard}>{product.nome}</Text>
             <Text style={styles.categoriaCard}>{product.categoria.tipo}</Text>
             <Text style={styles.atributosCard}>{product.descricao}</Text>
-            <Text style={styles.valorCard}>{product.valor}</Text>
+            <Text style={styles.valorCard}>R$ {product.valor.toFixed(2)}</Text>
 
             <View style={styles.botoesModal}>
               <TouchableOpacity
                 style={styles.botaoModal}
+                activeOpacity={0.7}
                 onPress={() => handleComprar(product)}
               >
                 <Text style={styles.textStyle}>Comprar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.botaoModal}
+                activeOpacity={0.7}
                 onPress={onClose}
               >
                 <Text style={styles.textStyle}>Fechar</Text>
@@ -97,7 +116,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 20,
     padding: 20,
-    width: "80%",
+    width: "90%",
     alignItems: "center",
   },
   imageCard: {
@@ -137,10 +156,8 @@ const styles = StyleSheet.create({
   botaoModal: {
     backgroundColor: "#000",
     borderRadius: 10,
-    paddingLeft: 25,
-    paddingRight: 25,
-    paddingBottom: 15,
-    paddingTop: 15,
+    paddingHorizontal: 25,
+    paddingVertical: 15,
     marginTop: 10,
   },
   textStyle: {

@@ -104,39 +104,6 @@ const register = () => {
     );
   };
 
-  const sendForm = async () => {
-    if (!validateForm()) return;
-
-    setIsLoading(true);
-
-    try {
-        const userData = {
-            email: email.value,
-            nome: fullName.value,  
-            cpf: cpf.value,
-            senha: password.value  
-        };
-
-        console.log('Dados sendo enviados:', userData);
-        Alert.alert(
-          'Configuração',
-          `Servidor: ${config.SERVER}\nPorta: ${config.PORT}\nURL: ${url}`
-        );
-
-        const response = await httpService.post(`${url}/cliente`, userData);
-
-        console.log('Resposta:', response);
-        router.replace('/(tabs)/home');
-    } catch (error) {
-        console.error('Erro completo:', error);
-        router.replace('/login');
-
-        
-    } finally {
-        setIsLoading(false);
-    }
-};
-
 //   const sendForm = async () => {
 //     if (!validateForm()) return;
 
@@ -152,17 +119,11 @@ const register = () => {
 
 //         console.log('Dados sendo enviados:', userData);
 //         Alert.alert(
-//           'Configuração do Servidor',
-//           `Server: ${config.SERVER}\nPort: ${config.PORT}\nURL Final: http://${config.SERVER}:${config.PORT}`
+//           'Configuração',
+//           `Servidor: ${config.SERVER}\nPorta: ${config.PORT}\nURL: ${url}`
 //         );
-//                 console.log('Server:', config.SERVER);
-//         console.log('Port:', config.PORT);
-//         console.log('URL Final:', `http://${config.server}:${config.port}`);
 
-//         const response = await httpService.post(
-//             `${url}/api/cliente`,
-//             userData
-//         );
+//         const response = await httpService.post(`${url}/cliente`, userData);
 
 //         console.log('Resposta:', response);
 //         router.replace('/(tabs)/home');
@@ -175,6 +136,44 @@ const register = () => {
 //         setIsLoading(false);
 //     }
 // };
+
+  const sendForm = async () => {
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+
+    try {
+        const userData = {
+            email: email.value,
+            nome: fullName.value,  
+            cpf: cpf.value,
+            senha: password.value  
+        };
+
+        console.log('Dados sendo enviados:', userData);
+        Alert.alert(
+          'Configuração do Servidor',
+          `Server: ${config.SERVER}\nPort: ${config.PORT}\nURL Final: http://${config.SERVER}:${config.PORT}`
+        );
+                console.log('Server:', config.SERVER);
+        console.log('Port:', config.PORT);
+        console.log('URL Final:', `http://${config.SERVER}:${config.PORT}`);
+
+        const response = await httpService.post(
+            `${url}/cliente`,
+            userData
+        );
+
+        console.log('Resposta:', response);
+        router.replace('/login');
+    } catch (error) {
+        router.replace('/register');
+
+        
+    } finally {
+        setIsLoading(false);
+    }
+};
 
   return (
     <View style={styles.formContainer}>
@@ -237,6 +236,8 @@ const register = () => {
           setConfirmPassword({ value: text, dirty: true })
         }
       />
+      <Text style={styles.textSenha}>Senha deve conter entre 6 e 10 caracteres. Letras e números.</Text>
+
       {handleErrorConfirmPassword()}
 
       <Text style={styles.loginLink}>
@@ -270,6 +271,11 @@ const register = () => {
 };
 
 const styles = StyleSheet.create({
+  textSenha:{
+    fontSize:11,
+    marginBottom:-20,
+    alignSelf: 'flex-start'
+  },
   container: {
     flex: 1,
     justifyContent: "center",
@@ -294,20 +300,20 @@ const styles = StyleSheet.create({
   },
 
   logoContainer: {
-    marginBottom: 20,
+    marginBottom: 5,
     alignItems: "center",
   },
   logo: {
     width: 100,
     height: 100,
     resizeMode: "contain",
-    marginBottom: 10,
+    marginBottom: -20,
   },
 
   label: {
     alignSelf: "flex-start",
-    marginTop: 2,
-    marginBottom: 2,
+    marginTop: 1,
+    marginBottom: 1,
     fontWeight: "600",
     fontSize: 16,
   },
@@ -325,7 +331,7 @@ const styles = StyleSheet.create({
 
   error: {
     color: "red",
-    marginBottom: 5,
+    marginBottom: 2,
     alignSelf: "flex-start",
   },
 

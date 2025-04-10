@@ -6,25 +6,26 @@ import {
   TextInput, 
   TouchableOpacity, 
   View, 
-  Image,
+  Image, 
   Alert 
 } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import httpService from "./services/httpService";
 import config from '../config';
 
+
+// ADICIONAR TRATATIVAS DE ERROS 
+
 const server = `${config.SERVER}`;
 const port = `${config.PORT}`;
 
 const Login = () => {
   const router = useRouter();
-
   const [email, setEmail] = useState({ value: "", dirty: false });
   const [password, setPassword] = useState({ value: "", dirty: false });
   const [errorMessage, setErrorMessage] = useState("");
-  const [name, setname] = useState('')
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleErrorEmail = () => {
     if (!email.value && email.dirty) {
@@ -32,14 +33,14 @@ const Login = () => {
     } else if (!emailRegex.test(email.value) && email.dirty) {
       return <Text style={styles.error}>E-mail inválido</Text>;
     }
-    return <Text style={styles.error}></Text>;
+    return null;
   };
 
   const handleErrorPassword = () => {
     if (!password.value && password.dirty) {
       return <Text style={styles.error}>Campo obrigatório</Text>;
     }
-    return <Text style={styles.error}></Text>;
+    return null;
   };
 
   const handleErrorForm = () => {
@@ -48,104 +49,92 @@ const Login = () => {
 
     if (!email.value || !emailRegex.test(email.value) || !password.value) {
       setErrorMessage("Preencha todos os campos corretamente para continuar.");
-      return;
+      return false;
     }
 
     setErrorMessage("");
+    return true;
   };
 
-  const sendForm = async() => {
-    if (!handleErrorForm) return;
-    
-    try{
+  const sendForm = async () => {
+    if (!handleErrorForm()) return;
+
+    try {
       const userData = {
         email: email.value,
-        senha: password.value
-      }
+        senha: password.value,
+      };
 
       const response = await httpService.post(`http://${server}:${port}/api/login`, userData);
-      alert(JSON.stringify(userData, null, 2)); 
-      console.log("RAFAEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEELA", JSON.stringify(response))
-      const loginName = response.cliente.nome
 
-      AsyncStorage.setItem(
-        'userName',
-        `${loginName}`
-      );
+      if (response && response.token) {
+        const { token, cliente } = response;
 
-      console.log("Resposta do servidor:", response);
-      router.replace("/(tabs)/home");
+        await AsyncStorage.setItem("userToken", token);
+        await AsyncStorage.setItem("userName", cliente.nome);
 
-    }catch(error){
-      console.error('Erro completo:', error);
-
+        console.log("Usuário autenticado:", cliente.nome);
+        router.replace("/(tabs)/home");
+      } else {
+        Alert.alert("Erro", response?.message || "Erro ao fazer login");
+      }
+    } catch (error) {
+      console.error("Erro ao logar:", error);
+      Alert.alert("Erro", "Falha ao conectar com o servidor");
     }
-  }
+  };
 
-  
   return (
-      <View style={styles.formContainer}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("../assets/images/logo.png")}
-            style={styles.logo}
-          />
-        </View>
-        <Text style={styles.label}>Email:</Text>
-        <TextInput
-          style={styles.input}
-          placeholderTextColor="#999"
-          value={email.value}
-          onChangeText={(text) => setEmail({ value: text, dirty: true })}
-        />
-        {handleErrorEmail()}
-        <Text style={styles.label}>Senha:</Text>
-        <TextInput
-          style={styles.input}
-          placeholderTextColor="#999"
-          secureTextEntry
-          value={password.value}
-          onChangeText={(text) => setPassword({ value: text, dirty: true })}
-        />
-        {handleErrorPassword()}
-
-        {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
-
-        <Text style={styles.loginLink}>
-          Ainda não tem uma conta? {" "}
-          <Text
-            style={styles.loginLinkBold}
-            onPress={() => router.replace("/register")}
-          >
-            Cadastre-se
-          </Text>
-        </Text>
-        <TouchableOpacity onPress={sendForm} style={styles.loginButton}>
-          <Text style={{ color: "#FFF" }}>Entrar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => router.replace("/welcome")}
-          style={styles.backButton}
-        >
-          <Text style={{ color: "#FFF" }}>Voltar</Text>
-        </TouchableOpacity>
+    <View style={styles.formContainer}>
+      <View style={styles.logoContainer}>
+        <Image source={require("../assets/images/logo.png")} style={styles.logo} />
       </View>
+      <Text style={styles.label}>Email:</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Digite seu email"
+        placeholderTextColor="#999"
+        value={email.value}
+        onChangeText={(text) => setEmail({ value: text, dirty: true })}
+      />
+      {handleErrorEmail()}
+
+      <Text style={styles.label}>Senha:</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Digite sua senha"
+        placeholderTextColor="#999"
+        secureTextEntry
+        value={password.value}
+        onChangeText={(text) => setPassword({ value: text, dirty: true })}
+      />
+      {handleErrorPassword()}
+
+      {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+
+      <Text style={styles.loginLink}>
+        Ainda não tem uma conta? {" "}
+        <Text style={styles.loginLinkBold} onPress={() => router.replace("/register")}>
+          Cadastre-se
+        </Text>
+      </Text>
+
+      <TouchableOpacity onPress={sendForm} style={styles.loginButton}>
+        <Text style={styles.buttonText}>Entrar</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => router.replace("/welcome")} style={styles.backButton}>
+        <Text style={styles.buttonText}>Voltar</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#EDEDED",
-    alignSelf: "center",  
-  },
-
   formContainer: {
     width: 350,
     backgroundColor: "#FFF",
-    padding: 30, 
+    padding: 30,
     borderRadius: 10,
     alignItems: "center",
     elevation: 5,
@@ -156,7 +145,6 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: "30%",
   },
-
   logoContainer: {
     marginBottom: 20,
     alignItems: "center",
@@ -167,7 +155,6 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     marginBottom: 10,
   },
-
   label: {
     alignSelf: "flex-start",
     marginTop: 2,
@@ -175,7 +162,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 16,
   },
-
   input: {
     width: "100%",
     height: 40,
@@ -186,13 +172,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
   },
-
   error: {
     color: "red",
     marginBottom: 5,
     alignSelf: "flex-start",
   },
-
   loginLink: {
     alignSelf: "flex-start",
     marginTop: 10,
@@ -204,7 +188,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textDecorationLine: "underline",
   },
-
   loginButton: {
     width: "100%",
     height: 45,
@@ -218,7 +201,7 @@ const styles = StyleSheet.create({
   backButton: {
     width: "100%",
     height: 45,
-    backgroundColor: "#444", 
+    backgroundColor: "#444",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 8,
