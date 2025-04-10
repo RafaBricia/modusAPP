@@ -9,9 +9,9 @@ import {
   Image, 
   Alert 
 } from "react-native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import httpService from "./services/httpService";
 import config from '../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 // ADICIONAR TRATATIVAS DE ERROS 
@@ -26,6 +26,8 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const senhaRegex = /^(?=.*[a-zA-Z])(?=.*\d).{6,10}$/; 
+
 
   const handleErrorEmail = () => {
     if (!email.value && email.dirty) {
@@ -39,6 +41,8 @@ const Login = () => {
   const handleErrorPassword = () => {
     if (!password.value && password.dirty) {
       return <Text style={styles.error}>Campo obrigatório</Text>;
+    } else if (!senhaRegex.test(password.value)&& password.dirty){
+      return <Text style={styles.error}>Senha inválida</Text>
     }
     return null;
   };

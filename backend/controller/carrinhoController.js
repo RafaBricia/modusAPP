@@ -15,16 +15,6 @@ function verificarQuantidadValida(qnt) {
 }
 
 
-async function produtoExistente(produto) {
-    try{
-        const produto = await Produto.findById(produto.id);
-        return !!produto;
-
-    } catch(error){
-        return error 
-    }
-}
-
 function valorValido(valor) {
 
     try{
@@ -37,8 +27,30 @@ function valorValido(valor) {
 }
 
 
+async function VerificarProdutos(produto) {
+    try {
+        if (Array.isArray(produto)) {
+            const produtosValidos = [];
+            for (const p of produto) {
+                const produtoAchado = await Produto.findById(p._id);
+                if (!produtoAchado) {
+                    return { existe: false, produtos: null }; 
+                }
+                produtosValidos.push(produtoAchado); 
+            }
+            return { existe: true, produtos: produtosValidos }; 
+        } else {
+            const produtoAchado = await Produto.findById(produto._id);
+            return { existe: !!produtoAchado, produtos: produtoAchado ? [produtoAchado] : null };
+        }
+    } catch (error) {
+        console.error("Erro ao verificar produtos:", error);
+        return { existe: false, produtos: null };
+    }
+}
+
+
 const postCarrinho = async (req, res) => {
-    
     try {
         const { quantidade, produto, valor } = req.body;
 
@@ -47,33 +59,28 @@ const postCarrinho = async (req, res) => {
         }
 
         if (!verificarQuantidadValida(quantidade)) {
-            return res.status(400).json({ message: 'Quantidade deve ser um valor positivo' });
+            return res.status(400).json({ message: 'Quantidade deve ser um inteiro positivo' });
         }
 
-        if(!valorValido(valor)){
-            return res.status(400).json({ message: 'Valor deve ser um valor positivo' });
-
+        if (!valorValido(valor)) {
+            return res.status(400).json({ message: 'Valor deve ser um número positivo' });
         }
 
-        if (!(await produtoExistente(produto))) {
-            return res.status(400).json({ message: 'Produto precisa existir.' });
-        }
-
-        const produtoEncontrado = await Produto.findById(produto);
-        if (!produtoEncontrado) {
-            return res.status(400).json({ message: 'Produto não encontrado.' });
+        const { existe, produtos } = await VerificarProdutos(produto);
+        if (!existe || !produtos) {
+            return res.status(400).json({ message: 'Produto(s) inválido(s) ou não encontrado(s)' });
         }
 
         const newCarrinho = new Carrinho({
             quantidade,
             valor,
-            produto
+            produto: Array.isArray(produto) ? produtos.map(p => p._id) : produtos[0]._id
         });
 
         await newCarrinho.save();
 
         res.json({ 
-            message: "Produto adicionado ao carrinho!", 
+            message: "Produto(s) adicionado(s) ao carrinho!", 
             carrinho: newCarrinho 
         });
 

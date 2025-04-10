@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import httpService from "./services/httpService";
 import config from '../config';  // Mudei para import direto
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const url = `http://${config.SERVER}:${config.PORT}/api`;
 
@@ -153,7 +154,7 @@ const register = () => {
         console.log('Dados sendo enviados:', userData);
         Alert.alert(
           'Configuração do Servidor',
-          `Server: ${config.SERVER}\nPort: ${config.PORT}\nURL Final: http://${config.SERVER}:${config.PORT}`
+          `Server: ${config.SERVER}\nPort: ${config.PORT}\nURL Final: ${url}`
         );
                 console.log('Server:', config.SERVER);
         console.log('Port:', config.PORT);
@@ -163,6 +164,8 @@ const register = () => {
             `${url}/cliente`,
             userData
         );
+
+        await AsyncStorage.setItem("userID", response.data._id);
 
         console.log('Resposta:', response);
         router.replace('/login');

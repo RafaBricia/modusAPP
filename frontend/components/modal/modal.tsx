@@ -11,6 +11,8 @@ import {
 import { useCarrinho } from "@/context/CarrinhoContext";
 import httpService from "@/app/services/httpService";
 import config from '../../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 interface Categoria {
   _id: string;
@@ -46,15 +48,18 @@ const ProductModal = ({ visible, product, onClose }: ProductModalProps) => {
 
     try {
       const produtoParaCarrinho = {
-        _id: produto._id,
-        quantidade: produto.quantidade || 1, // Definir um valor padrão caso esteja indefinido
+        produto: produto._id,
+        quantidade: 1,
+        valor: produto.valor
       };
 
-      const response = await httpService.post(`${url}/carrinho`, produtoParaCarrinho);
+      const {carrinho}= await httpService.post(`${url}/carrinho`, produtoParaCarrinho);
+      console.log('RESPONSEEEE- CCARRINHOOOOOOOOOOOOO',carrinho)
+      await AsyncStorage.setItem("carrinhoID", carrinho._id);
 
       // Se a requisição foi bem-sucedida, adiciona ao carrinho local
       // adicionarAoCarrinho(produtoParaCarrinho);
-      Alert.alert("Sucesso!", `Item adicionado ao carrinho.\n${JSON.stringify(response)}`);
+      Alert.alert("Sucesso!", `Item adicionado ao carrinho.\n${JSON.stringify(carrinho)}`);
 
       onClose();
     } catch (error) {
@@ -80,7 +85,7 @@ const ProductModal = ({ visible, product, onClose }: ProductModalProps) => {
             <Text style={styles.atributosCard}>{product.nome}</Text>
             <Text style={styles.categoriaCard}>{product.categoria.tipo}</Text>
             <Text style={styles.atributosCard}>{product.descricao}</Text>
-            <Text style={styles.valorCard}>R$ {product.valor.toFixed(2)}</Text>
+            <Text style={styles.valorCard}>Valor: R$ {product.valor}</Text>
 
             <View style={styles.botoesModal}>
               <TouchableOpacity
