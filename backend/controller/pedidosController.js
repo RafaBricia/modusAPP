@@ -3,17 +3,17 @@ const Cliente = require('../model/clienteModel.js');
 const Carrinho = require('../model/carrinhoModel.js')
 
 
-async function CarrinhoExistente(client) {
+async function ClienteExistente(client) {
     try {
-        const cliente = await Cliente.findById(client); 
+        const cliente = await Cliente.findById(client._id); 
         return !!cliente;
     } catch (error) {
         return false; 
     }
 }
-async function ClienteExistente(carrinho) {
+async function CarrinhoExistente(carrinho) {
     try {
-        const carrinho = await Carrinho.findById(carrinho).populate('produto'); 
+        const carrinho = await Carrinho.findById(carrinho._id).populate('produto'); 
         return !!carrinho;
     } catch (error) {
         return false; 
@@ -21,37 +21,51 @@ async function ClienteExistente(carrinho) {
 }
 
 
-
 const postPedido = async (req, res) => {
     try {
+        const { cliente, carrinho, frase } = req.body;
 
-        const { cliente, carrinho } = req.body;
-
-        if ( !cliente || !carrinho) {
-            return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
+        // Verificações básicas
+        if (!cliente?._id || !carrinho?._id) {
+            return res.status(400).json({ message: 'IDs são obrigatórios' });
         }
 
-        if (!(await CarrinhoExistente(carrinho))) {
-            return res.status(400).json({ message: 'Carrinho não encontrado.' });
-        }
+        // Busca documentos completos
+        const clienteDoc = await Cliente.findById(cliente._id);
+        const carrinhoDoc = await Carrinho.findById(carrinho._id).populate('produto');
 
-        if (!(await ClienteExistente(cliente))) {
-            return res.status(400).json({ message: 'Cliente não encontrado.' });
+        if (!clienteDoc || !carrinhoDoc || !carrinhoDoc.produto) {
+            return res.status(404).json({ message: 'Cliente, carrinho ou produto não encontrado' });
         }
+        
 
-        const newPedido = new Pedido({ 
-            cliente, 
-            carrinho,
-            frase: `${cliente.nome} comprou ${carrinho.quantidade}x ${carrinho.produto.nome} por R$ ${carrinho.produto.valor} cada. Total: R$ ${carrinho.valorTotal}`
- 
+        const fraseString = `${clienteDoc.nome} comprou ${carrinhoDoc.quantidade}x ` +
+                     `${carrinhoDoc.produto}`
+
+        // Cria o pedido
+        const newPedido = new Pedido({
+            cliente: clienteDoc._id,
+            carrinho: carrinhoDoc._id,
+            frase: fraseString
         });
 
         await newPedido.save();
 
-        res.json({ message: "Novo Pedido foi criado!", Pedido: newPedido });
+        res.status(201).json({
+            message: "Pedido criado com sucesso!",
+            pedido: {
+                ...newPedido.toObject(),
+                cliente: clienteDoc,
+                carrinho: carrinhoDoc
+            }
+        });
 
     } catch (error) {
-        res.status(500).json({ message: 'Pedido não foi criado.', error: error.message });
+        console.error('Erro detalhado:', error);
+        res.status(500).json({ 
+            message: 'Erro ao criar pedido', 
+            error: error.message 
+        });
     }
 };
 

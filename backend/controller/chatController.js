@@ -12,7 +12,7 @@ const chatController = {
     
     longContext: async (req, res) => {
         try {
-            const context = m
+            const context = ''
             const result = await aiService.longContext(req.body.prompt,context);
             res.status(200).json(result.text());
         } catch (error) {

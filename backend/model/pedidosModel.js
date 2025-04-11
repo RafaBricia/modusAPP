@@ -12,6 +12,10 @@ const pedidoSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId, 
     ref:"carrinho", 
     required: true 
+  },
+  frase:{
+    type: String,
+    required: true 
   }
 
 });

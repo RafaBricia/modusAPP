@@ -22,7 +22,7 @@ const loginCliente = async (req, res) => {
 
             return res.status(200).json({ 
                 message: "Login realizado com sucesso", 
-                cliente: { nome: cliente.nome, email: cliente.email },
+                cliente: { nome: cliente.nome, email: cliente.email, id: cliente._id},
                 token 
             });
         });

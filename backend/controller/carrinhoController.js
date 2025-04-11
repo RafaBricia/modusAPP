@@ -26,23 +26,16 @@ function valorValido(valor) {
     }   
 }
 
-
-async function VerificarProdutos(produto) {
+async function VerificarProdutos(produtoIds) {
     try {
-        if (Array.isArray(produto)) {
-            const produtosValidos = [];
-            for (const p of produto) {
-                const produtoAchado = await Produto.findById(p._id);
-                if (!produtoAchado) {
-                    return { existe: false, produtos: null }; 
-                }
-                produtosValidos.push(produtoAchado); 
-            }
-            return { existe: true, produtos: produtosValidos }; 
-        } else {
-            const produtoAchado = await Produto.findById(produto._id);
-            return { existe: !!produtoAchado, produtos: produtoAchado ? [produtoAchado] : null };
-        }
+        // Garante que sempre trabalhamos com array
+        const ids = Array.isArray(produtoIds) ? produtoIds : [produtoIds];
+        
+        const produtos = await Produto.find({ _id: { $in: ids } });
+        return {
+            existe: produtos.length === ids.length,
+            produtos: produtos
+        };
     } catch (error) {
         console.error("Erro ao verificar produtos:", error);
         return { existe: false, produtos: null };
@@ -71,10 +64,11 @@ const postCarrinho = async (req, res) => {
             return res.status(400).json({ message: 'Produto(s) inválido(s) ou não encontrado(s)' });
         }
 
+        // Criação do carrinho
         const newCarrinho = new Carrinho({
             quantidade,
             valor,
-            produto: Array.isArray(produto) ? produtos.map(p => p._id) : produtos[0]._id
+            produto: produtos.map(p => p._id) // Garante array de IDs
         });
 
         await newCarrinho.save();
@@ -92,7 +86,7 @@ const postCarrinho = async (req, res) => {
 
 const getAllCarrinhos = async (req, res) => {
     try {
-        const carrinhos = await Carrinho.find().populate('cliente');
+        const carrinhos = await Carrinho.find().populate('produto');
         res.json(carrinhos);
     } catch (error) {
         res.status(500).json({ message: 'Não é possível listar os Carrinhos.' });
@@ -100,17 +94,13 @@ const getAllCarrinhos = async (req, res) => {
 };
 
 const getCarrinho = async (req, res) => {
-    
-    try{
-        const { id } = req.params;
-        const carrinho = await Carrinho.findById({ _id: id });
+    try {
+        const { _id } = req.params;
+        const carrinho = await Carrinho.findById(_id).populate('produto');
         res.json(carrinho);
-
-    } catch(error){
+    } catch (error) {
         res.status(500).json({ message: 'Não foi possível encontrar esse Carrinho.', error: error.message });
-
     }
-
 }
 
 const deleteCarrinho = async (req, res) => {

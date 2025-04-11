@@ -9,7 +9,7 @@ const ws = new WebSocketServer({ server });
 const cors = require('cors');
 const bodyParser = require("body-parser");
 const db = require("./db/database.js");
-const Carrinho = require('./model/carrinhoModel.js')
+const Pedido = require('./model/pedidosModel.js')
 
 
 // Importação de rotas
@@ -18,7 +18,6 @@ const carrinhoRoute = require("./route/carrinhoRoute.js");
 const produtoRoute = require("./route/produtoRoute.js");
 const categoriaRoute = require('./route/categoriaRoute.js');
 const loginRoute = require('./route/loginRoute.js');
-const PagamentoRoute = require('./route/pagamentoRoute.js');
 const pedidosRoute = require('./route/pedidosRoute.js');
 const ChatRoute = require('./route/ChatRoute.js');
 const aiService = require('./services/aiService.js'); // Adicione esta linha
@@ -35,19 +34,21 @@ ws.on('connection', (client) => {
     client.on("message", async (message) => {
         const msg = JSON.parse(message.toString());
         
-        const carrinhos = await Carrinho.find()
-            .populate('cliente')
-            .populate('produto');
+        const pedidos = await Pedido.find()
+            .populate('carrinho');
         
         let historicoString = '';
         
-        carrinhos.forEach((carrinho) => {
-            historicoString = carrinho.frase
+        pedidos.forEach((p) => {
+            historicoString = p.frase
         });
         
         const context = historicoCompras;
-        
+        console.log('CONTEXTXXXXXXXX:',context)
+
         const result = await aiService.longContext(msg.text, context);
+        console.log('RESULTTTTTTTTTT:',result)
+
         const resultJson = { text: result.text(), sentBy: 'Gemini' };
         const msgString = JSON.stringify(resultJson);
 
@@ -64,7 +65,6 @@ server.listen(port, () => {
 
 
 app.use("/api", produtoRoute);
-app.use("/api", PagamentoRoute);
 app.use("/api", clienteRoute);
 app.use("/api", carrinhoRoute);
 app.use("/api", loginRoute);

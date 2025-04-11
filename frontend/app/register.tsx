@@ -105,38 +105,6 @@ const register = () => {
     );
   };
 
-//   const sendForm = async () => {
-//     if (!validateForm()) return;
-
-//     setIsLoading(true);
-
-//     try {
-//         const userData = {
-//             email: email.value,
-//             nome: fullName.value,  
-//             cpf: cpf.value,
-//             senha: password.value  
-//         };
-
-//         console.log('Dados sendo enviados:', userData);
-//         Alert.alert(
-//           'Configuração',
-//           `Servidor: ${config.SERVER}\nPorta: ${config.PORT}\nURL: ${url}`
-//         );
-
-//         const response = await httpService.post(`${url}/cliente`, userData);
-
-//         console.log('Resposta:', response);
-//         router.replace('/(tabs)/home');
-//     } catch (error) {
-//         console.error('Erro completo:', error);
-//         router.replace('/login');
-
-        
-//     } finally {
-//         setIsLoading(false);
-//     }
-// };
 
   const sendForm = async () => {
     if (!validateForm()) return;
@@ -164,8 +132,6 @@ const register = () => {
             `${url}/cliente`,
             userData
         );
-
-        await AsyncStorage.setItem("userID", response.data._id);
 
         console.log('Resposta:', response);
         router.replace('/login');

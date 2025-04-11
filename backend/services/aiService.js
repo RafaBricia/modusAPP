@@ -54,11 +54,6 @@ const gemini = {
         Forneça o título do documento e uma resposta final baseada exclusivamente no conteúdo do documento, atendendo a todos os requisitos da descrição da tarefa.
         `;
 
-        // // Lendo os arquivos PDF e convert'./src/context/dadosAnaliticos.pdf'endo para Base64
-        // const pdfBuffer1 = fs.readFileSync(context);
-        // const pdfBase64_1 = pdfBuffer1.toString('base64');
-
-
         // Construindo a requisição para a API Gemini
         const p = {
             "contents": [{

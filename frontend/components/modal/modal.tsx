@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { 
   Modal, 
   TouchableOpacity, 
@@ -6,13 +6,12 @@ import {
   View, 
   Image, 
   Text, 
-  Alert 
+  Alert,
+  DeviceEventEmitter 
 } from "react-native";
-import { useCarrinho } from "@/context/CarrinhoContext";
 import httpService from "@/app/services/httpService";
 import config from '../../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 interface Categoria {
   _id: string;
@@ -41,30 +40,46 @@ const port = `${config.PORT}`;
 const url = `http://${server}:${port}/api`;
 
 const ProductModal = ({ visible, product, onClose }: ProductModalProps) => {
-  // const { adicionarAoCarrinho } = useCarrinho();
-
-  const handleComprar = async (produto: Product) => {
-    if (!produto) return;
-
+  
+  const listaProdutos = async (produto: Product) => {
     try {
-      const produtoParaCarrinho = {
-        produto: produto._id,
-        quantidade: 1,
-        valor: produto.valor
-      };
-
-      const {carrinho}= await httpService.post(`${url}/carrinho`, produtoParaCarrinho);
-      console.log('RESPONSEEEE- CCARRINHOOOOOOOOOOOOO',carrinho)
-      await AsyncStorage.setItem("carrinhoID", carrinho._id);
-
-      // Se a requisição foi bem-sucedida, adiciona ao carrinho local
-      // adicionarAoCarrinho(produtoParaCarrinho);
-      Alert.alert("Sucesso!", `Item adicionado ao carrinho.\n${JSON.stringify(carrinho)}`);
-
-      onClose();
+      // Verificar se já existem produtos no AsyncStorage
+      const produtosExistentes = await AsyncStorage.getItem('CarrinhoProdutos');
+      let produtosArray: Product[] = [];
+      
+      if (produtosExistentes) {
+        produtosArray = JSON.parse(produtosExistentes);
+        // Verificar se o array é válido
+        if (!Array.isArray(produtosArray)) {
+          produtosArray = [];
+        }
+      }
+      
+      // Verificar se o produto já existe no carrinho
+      const produtoExistente = produtosArray.find(item => item._id === produto._id);
+      
+      if (produtoExistente) {
+        // Se já existe, apenas incrementa a quantidade
+        produtoExistente.quantidade = (produtoExistente.quantidade || 1) + 1;
+      } else {
+        // Se não existe, adiciona com quantidade 1
+        const produtoParaCarrinho = {
+          ...produto,
+          quantidade: 1  // Garantir que sempre tenha quantidade
+        };
+        produtosArray.push(produtoParaCarrinho);
+      }
+      
+      // Salvar o array atualizado
+      await AsyncStorage.setItem('CarrinhoProdutos', JSON.stringify(produtosArray));
+      
+      // Emitir evento para notificar o componente Carrinho
+      DeviceEventEmitter.emit('carrinhoAtualizado', produtosArray);
+      
+      Alert.alert("Sucesso!", "Produto adicionado ao carrinho!");
     } catch (error) {
-      console.error("Erro ao adicionar ao carrinho:", error);
-      Alert.alert("Erro", "Não foi possível adicionar o item ao carrinho.");
+      console.error("Erro ao adicionar produto:", error);
+      Alert.alert("Erro", "Falha ao adicionar produto");
     }
   };
 
@@ -91,7 +106,7 @@ const ProductModal = ({ visible, product, onClose }: ProductModalProps) => {
               <TouchableOpacity
                 style={styles.botaoModal}
                 activeOpacity={0.7}
-                onPress={() => handleComprar(product)}
+                onPress={() => listaProdutos(product)}
               >
                 <Text style={styles.textStyle}>Comprar</Text>
               </TouchableOpacity>

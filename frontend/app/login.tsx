@@ -76,6 +76,8 @@ const Login = () => {
 
         await AsyncStorage.setItem("userToken", token);
         await AsyncStorage.setItem("userName", cliente.nome);
+        await AsyncStorage.setItem("ClienteID", cliente.id);
+
 
         console.log("Usuário autenticado:", cliente.nome);
         router.replace("/(tabs)/home");
