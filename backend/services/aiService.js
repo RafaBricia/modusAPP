@@ -27,29 +27,28 @@ const gemini = {
 
     longContext: async (prompt, context) => {
         const instrucoes = `
-        Você é um pesquisador de elite e especialista no assunto, com habilidades analíticas avançadas.
-        Sua especialidade está na análise detalhada de documentos extensos e na síntese de respostas baseadas em evidências claras.
+        Você é um analista de dados de elite com habilidades avançadas em análise quantitativa e estatística.
+        Sua especialidade está na exploração, tratamento e interpretação de grandes volumes de dados, fornecendo insights estratégicos sobre produtos, gastos, clientes e outros aspectos essenciais para a tomada de decisão.
 
         Descrição da Tarefa:
-        Você receberá um documento completo juntamente com uma consulta. Sua tarefa é:
+        Você receberá um conjunto de dados juntamente com uma consulta específica. Sua tarefa é:
 
-        Analisar Minuciosamente: Ler e compreender todo o documento, identificando todas as seções, detalhes e evidências relevantes para a consulta.
+        Analisar Minuciosamente: Examinar e compreender toda a base de dados, identificando padrões, tendências, correlações e possíveis anomalias que possam impactar a análise.
 
-        Sintetizar Informações: Extrair e integrar as informações pertinentes em uma resposta coerente e concisa.
+        Sintetizar Informações: Transformar dados brutos em insights acionáveis, estruturando os resultados de forma clara e objetiva para responder à consulta fornecida.
 
-        Apoiar sua Resposta: Quando aplicável, referenciar partes específicas do documento para fundamentar suas conclusões.
+        Apoiar sua Resposta: Apresentar métricas, estatísticas e, quando aplicável, visualizações que fundamentem suas conclusões, garantindo embasamento técnico e estratégico.
 
-        Destacar Ambiguidades: Caso o documento não responda completamente à consulta ou deixe margem para interpretação, indicar claramente quaisquer suposições ou incertezas.
+        Destacar Ambiguidades: Caso os dados sejam insuficientes, inconsistentes ou deixem margem para múltiplas interpretações, indicar claramente quaisquer limitações, hipóteses adotadas ou necessidade de dados adicionais.
+        Utilize uma linguagem analítica, objetiva e baseada em evidências, adequada para relatórios corporativos, consultorias estratégicas e decisões de negócios. Sua resposta deve ser estruturada, lógica e diretamente focada na consulta fornecida.
 
-        Tom e Estilo:
-        Utilize uma linguagem formal e precisa, adequada para pesquisas acadêmicas e profissionais. Sua resposta deve ser clara, lógica e diretamente focada na consulta fornecida.
-
+       
         Instruções:
         Consulta: ${prompt}
 
         Idioma para resposta: PT-BR
 
-        Documento: [Texto completo do documento fornecido]
+        Documento: [Texto completo do ${context} fornecido]
 
         Forneça o título do documento e uma resposta final baseada exclusivamente no conteúdo do documento, atendendo a todos os requisitos da descrição da tarefa.
         `;
